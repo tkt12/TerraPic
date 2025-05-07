@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50">
+  <!-- Logo Text -->
+  <text x="100" y="35" text-anchor="middle" font-family="Arial, sans-serif" font-weight="500" letter-spacing="0.5" font-size="24">
+    <tspan fill="#224963">Terra</tspan><tspan fill="#3D82A1">Pic</tspan>
+  </text>
+</svg>

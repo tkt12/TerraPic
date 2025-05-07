@@ -1,0 +1,112 @@
+# TerraPic API Documentation
+
+## 概要
+TerraPicは写真共有に特化したSNSアプリケーションのバックエンドAPIです。
+
+## 認証
+すべてのAPIリクエストはJWTトークンによる認証が必要です（一部のエンドポイントを除く）。
+
+### 認証ヘッダー
+```
+Authorization: Bearer <access_token>
+```
+
+## エンドポイント一覧
+
+### 認証関連
+
+#### ログイン
+```
+POST /api/login/
+```
+**リクエストボディ**
+- email: メールアドレス
+- password: パスワード
+
+**レスポンス**
+```json
+{
+    "refresh": "リフレッシュトークン",
+    "access": "アクセストークン"
+}
+```
+
+#### サインアップ
+```
+POST /api/signup/
+```
+**リクエストボディ**
+- email: メールアドレス
+- password1: パスワード
+- password2: パスワード（確認用）
+- username: ユーザー名
+- name: 表示名
+- profile_image: プロフィール画像（オプション）
+
+### 投稿関連
+
+#### 投稿作成
+```
+POST /api/post/create/
+```
+**リクエストボディ（multipart/form-data）**
+- photo_image: 投稿画像
+- place_data: 場所情報（JSON文字列）
+  - name: 場所名
+  - latitude: 緯度
+  - longitude: 経度
+- description: 説明文
+- rating: 評価（1-5）
+- weather: 天気
+- season: 季節
+
+#### いいね追加/削除
+```
+POST /api/post/<post_id>/like/
+```
+
+### 場所関連
+
+#### 近くの場所を検索
+```
+GET /api/places/
+```
+**クエリパラメータ**
+- min_lat: 最小緯度
+- max_lat: 最大緯度
+- min_lon: 最小経度
+- max_lon: 最大経度
+
+### ユーザープロフィール関連
+
+#### プロフィール取得
+```
+GET /api/profile/
+```
+
+#### プロフィール編集
+```
+PUT /api/profile/edit/
+```
+**リクエストボディ**
+- username: ユーザー名（オプション）
+- name: 表示名（オプション）
+- bio: 自己紹介（オプション）
+- profile_image: プロフィール画像（オプション）
+
+## エラーレスポンス
+エラー時は以下の形式でレスポンスが返されます：
+```json
+{
+    "error": "エラーメッセージ"
+}
+```
+
+## ステータスコード
+- 200: リクエスト成功
+- 201: リソース作成成功
+- 400: リクエスト不正
+- 401: 認証エラー
+- 403: 権限エラー
+- 404: リソース未発見
+- 500: サーバーエラー

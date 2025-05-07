@@ -1,0 +1,14 @@
+Django==4.2
+psycopg2-binary==2.9.6
+GDAL==3.4.1
+djangorestframework==3.14.0
+djangorestframework-simplejwt
+psycopg2-binary
+gunicorn
+Pillow
+django-cors-headers
+django-allauth
+requests
+pyjwt
+cryptography
+python-magic==0.4.24

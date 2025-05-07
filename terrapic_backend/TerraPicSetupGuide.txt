@@ -1,0 +1,113 @@
+# TerraPic 開発環境セットアップガイド
+
+## 必要要件
+- Python 3.12
+- PostgreSQL 14（PostGIS拡張必須）
+- Docker & Docker Compose
+
+## 環境構築手順
+
+1. リポジトリのクローン
+```bash
+git clone [リポジトリURL]
+cd terrapic_backend
+```
+
+2. Docker環境の構築
+```bash
+docker-compose build
+docker-compose up -d
+```
+
+3. マイグレーションの実行
+```bash
+docker-compose exec web python manage.py migrate
+```
+
+4. 開発サーバーの起動
+```bash
+docker-compose up
+```
+
+## 開発環境の設定
+
+### 環境変数
+以下の環境変数を`.env`ファイルに設定してください：
+```
+DATABASE=postgres
+SQL_HOST=db
+SQL_PORT=5432
+SQL_DATABASE=terrapic
+SQL_USER=admin
+SQL_PASSWORD=admin
+```
+
+### APIキーの設定
+Google Places APIを使用するため、以下の設定が必要です：
+1. Google Cloud Consoleでプロジェクトを作成
+2. Places APIを有効化
+3. APIキーを取得
+4. `api/place.py`の`API_KEY`を更新
+
+## 開発のベストプラクティス
+
+### コーディング規約
+- PEP 8に準拠したコードを書く
+- クラスには適切なドキュメント文字列を付ける
+- 関数には引数と戻り値の型ヒントを付ける
+
+### コミットメッセージ
+以下の形式でコミットメッセージを書いてください：
+```
+[種類] 変更の概要
+
+変更の詳細な説明
+```
+
+種類:
+- feat: 新機能
+- fix: バグ修正
+- docs: ドキュメントのみの変更
+- style: コードの動作に影響しない変更
+- refactor: リファクタリング
+
+### ブランチ戦略
+- main: プロダクション環境用
+- develop: 開発用メインブランチ
+- feature/*: 新機能開発用
+- fix/*: バグ修正用
+
+## トラブルシューティング
+
+### よくある問題と解決方法
+
+1. データベース接続エラー
+```
+postgresに接続できない場合：
+1. docker-compose downを実行
+2. docker volume pruneでボリュームを削除
+3. docker-compose upで再起動
+```
+
+2. GDALライブラリ関連のエラー
+```
+apt-get update && apt-get install -y gdal-bin libgdal-devを実行
+```
+
+### デバッグ方法
+- ログは`django_debug.log`に出力されます
+- DEBUGレベルのログを確認する場合は`settings.py`のLOGGINGを調整してください
+
+## デプロイメント
+
+### 本番環境の準備
+1. 本番用の環境変数を設定
+2. SECRET_KEYを変更
+3. DEBUG=Falseに設定
+4. ALLOWED_HOSTSを適切に設定
+
+### デプロイ手順
+1. コードのビルド
+2. マイグレーションの実行
+3. 静的ファイルの収集
+4. Webサーバーの設定

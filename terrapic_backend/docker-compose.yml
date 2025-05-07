@@ -1,0 +1,40 @@
+version: '3.9'
+
+services:
+  db:
+    image: kartoza/postgis:14
+    platform: linux/arm64
+    environment:
+      POSTGRES_DB: terrapic
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  web:
+    build:
+      context: ./terrapic_backend
+      dockerfile: Dockerfile
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./terrapic_backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE=postgres
+      - SQL_HOST=db
+      - SQL_PORT=5432
+      - SQL_DATABASE=terrapic
+      - SQL_USER=admin
+      - SQL_PASSWORD=admin
+      - PYTHONPATH=/app
+      - DJANGO_SETTINGS_MODULE=terrapic_backend.settings
+      - GDAL_LIBRARY_PATH=/lib/aarch64-linux-gnu/libgdal.so
+      - DJANGO_ALLOWED_HOSTS=localhost, 192.168.244.245
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
