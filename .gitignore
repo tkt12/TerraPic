@@ -1,0 +1,56 @@
+# Environment variables
+.env
+*.env
+!.env.example
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.log
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+/media
+/staticfiles
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Flutter/Dart
+terrapic_frontend/.dart_tool/
+terrapic_frontend/.flutter-plugins
+terrapic_frontend/.flutter-plugins-dependencies
+terrapic_frontend/.packages
+terrapic_frontend/build/
+terrapic_frontend/ios/Pods/
+terrapic_frontend/ios/.symlinks/
+terrapic_frontend/android/.gradle/
+terrapic_frontend/android/app/*.iml
+terrapic_frontend/android/local.properties
+
+# Docker
+*.dockerignore

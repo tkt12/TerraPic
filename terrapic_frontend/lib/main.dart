@@ -125,11 +125,6 @@ class AuthWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, _) {
-        // デバッグ用のログ出力
-        print(
-            'AuthWrapper rebuild - isAuthenticated: ${authProvider.isAuthenticated}');
-        print('AuthWrapper rebuild - isLoading: ${authProvider.isLoading}');
-
         // ローディング状態の表示
         if (authProvider.isLoading) {
           return const Scaffold(
@@ -139,11 +134,9 @@ class AuthWrapper extends StatelessWidget {
 
         // 認証状態に基づいて画面を表示
         if (authProvider.isAuthenticated) {
-          print('User is authenticated, showing MainScreen');
           return const MainScreen();
         }
 
-        print('User is not authenticated, showing LoginScreen');
         return const LoginScreen();
       },
     );

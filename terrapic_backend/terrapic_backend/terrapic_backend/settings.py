@@ -21,12 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-k=btg71b%^7yhz4#m#pu+%t2*b7mfj1&)fvr142q6+n*@6!#-c'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-k=btg71b%^7yhz4#m#pu+%t2*b7mfj1&)fvr142q6+n*@6!#-c')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True  # 開発中はTrueにしておく
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['*']  # 開発中のみ。本番環境では適切に設定すること
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if not DEBUG else ['*']
 
 # ログファイルのパスを設定
 LOG_FILE = os.path.join(BASE_DIR, 'django_debug.log')
@@ -101,7 +101,8 @@ CACHES = {
     }
 }
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = os.environ.get('CORS_ALLOW_ALL_ORIGINS', 'False') == 'True'
+CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',') if os.environ.get('CORS_ALLOWED_ORIGINS') else []
 ROOT_URLCONF = 'terrapic_backend.urls'
 
 TEMPLATES = [
