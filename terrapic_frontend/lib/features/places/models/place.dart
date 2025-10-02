@@ -12,7 +12,7 @@
 import 'dart:math';
 
 class Place {
-  final String id;
+  final String? id;
   final String name;
   final String? formattedAddress;
   final double latitude;
@@ -21,7 +21,7 @@ class Place {
   final double? photoSpotLongitude;
 
   Place({
-    required this.id,
+    this.id,
     required this.name,
     this.formattedAddress,
     required this.latitude,
@@ -33,7 +33,7 @@ class Place {
   /// JSONからPlaceオブジェクトを生成
   factory Place.fromJson(Map<String, dynamic> json) {
     return Place(
-      id: json['id'].toString(),
+      id: json['id']?.toString(),
       name: json['name'],
       formattedAddress: json['formatted_address'],
       latitude: json['latitude'].toDouble(),

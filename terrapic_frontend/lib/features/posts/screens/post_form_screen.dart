@@ -14,12 +14,14 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../core/config/app_config.dart';
 import '../../../features/auth/services/auth_service.dart';
 import '../../places/models/place.dart';
 import '../widgets/location_picker.dart';
 import '../screens/post_screen.dart';
 import '../../../shared/widgets/base_layout.dart';
+import '../../../shared/utils/image_helper.dart';
 
 class PostFormScreen extends StatefulWidget {
   final File image;
@@ -44,6 +46,7 @@ class PostFormScreenState extends State<PostFormScreen> {
   String? _weather;
   String? _season;
   bool _isLoading = false;
+  LatLng? _geotagLocation; // ジオタグから取得した位置情報
 
   // 選択肢
   final List<String> _weatherOptions = ['晴れ', '曇り', '雨', '雪', 'その他'];
@@ -53,6 +56,31 @@ class PostFormScreenState extends State<PostFormScreen> {
   void initState() {
     super.initState();
     _checkAuth();
+    _tryLoadLocationFromImage();
+  }
+
+  /// 画像からジオタグを読み取って位置情報を取得
+  Future<void> _tryLoadLocationFromImage() async {
+    try {
+      final location = await ImageHelper.getLocationFromImage(widget.image);
+
+      if (location != null && mounted) {
+        setState(() {
+          _geotagLocation = location;
+        });
+
+        // ユーザーに通知
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('写真から撮影場所の位置情報を取得しました'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error loading location from image: $e');
+      // エラーが発生してもユーザーには通知せず、手動選択に任せる
+    }
   }
 
   /// 認証状態をチェック
@@ -69,7 +97,9 @@ class PostFormScreenState extends State<PostFormScreen> {
   void _navigateToLocationPicker() async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const LocationPicker()),
+      MaterialPageRoute(
+        builder: (context) => LocationPicker(geotagLocation: _geotagLocation),
+      ),
     );
 
     if (result is Place) {

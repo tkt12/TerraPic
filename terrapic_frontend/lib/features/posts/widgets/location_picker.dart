@@ -18,7 +18,9 @@ import '../../places/models/place.dart';
 import '../../../shared/widgets/base_layout.dart';
 
 class LocationPicker extends StatefulWidget {
-  const LocationPicker({Key? key}) : super(key: key);
+  final LatLng? geotagLocation;
+
+  const LocationPicker({Key? key, this.geotagLocation}) : super(key: key);
 
   @override
   _LocationPickerState createState() => _LocationPickerState();
@@ -87,7 +89,10 @@ class _LocationPickerState extends State<LocationPicker> {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => PhotoSpotPicker(place: place),
+        builder: (context) => PhotoSpotPicker(
+          place: place,
+          geotagLocation: widget.geotagLocation,
+        ),
       ),
     );
 
@@ -171,10 +176,12 @@ class _LocationPickerState extends State<LocationPicker> {
 /// 写真スポットを選択するウィジェット
 class PhotoSpotPicker extends StatefulWidget {
   final Place place;
+  final LatLng? geotagLocation;
 
   const PhotoSpotPicker({
     Key? key,
     required this.place,
+    this.geotagLocation,
   }) : super(key: key);
 
   @override
@@ -189,14 +196,31 @@ class _PhotoSpotPickerState extends State<PhotoSpotPicker> {
   @override
   void initState() {
     super.initState();
-    // 既に撮影位置が設定されている場合はそれを使用し、
-    // なければ場所の基準座標を使用
-    _selectedLocation = widget.place.hasPhotoSpot
-        ? LatLng(
-            widget.place.photoSpotLatitude!,
-            widget.place.photoSpotLongitude!,
-          )
-        : LatLng(widget.place.latitude, widget.place.longitude);
+    // 優先順位:
+    // 1. ジオタグから取得した位置情報
+    // 2. 既に撮影位置が設定されている場合
+    // 3. 場所の基準座標
+    if (widget.geotagLocation != null) {
+      _selectedLocation = widget.geotagLocation!;
+      // ジオタグから位置を取得した場合は通知
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('写真のジオタグから撮影場所を自動設定しました'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      });
+    } else if (widget.place.hasPhotoSpot) {
+      _selectedLocation = LatLng(
+        widget.place.photoSpotLatitude!,
+        widget.place.photoSpotLongitude!,
+      );
+    } else {
+      _selectedLocation = LatLng(widget.place.latitude, widget.place.longitude);
+    }
 
     _addMarker(_selectedLocation);
   }
@@ -260,8 +284,11 @@ class _PhotoSpotPickerState extends State<PhotoSpotPicker> {
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
-                  '写真を撮影した位置を指定してください。\n'
-                  'マーカーをドラッグするか、地図をタップして位置を指定できます。',
+                  widget.geotagLocation != null
+                      ? '写真のジオタグから撮影場所を自動設定しました。\n'
+                          '必要に応じてマーカーをドラッグまたは地図をタップして調整できます。'
+                      : '写真を撮影した位置を指定してください。\n'
+                          'マーカーをドラッグするか、地図をタップして位置を指定できます。',
                   style: TextStyle(color: Colors.grey[700]),
                 ),
               ),
