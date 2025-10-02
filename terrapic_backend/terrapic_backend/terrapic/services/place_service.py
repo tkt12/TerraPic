@@ -2,6 +2,7 @@ from django.contrib.gis.geos import Point, Polygon
 from django.contrib.gis.measure import D
 from django.db.models import Count, Avg, Q, Prefetch
 from django.core.cache import cache
+from django.conf import settings
 from ..models import Places, Posts
 from ..utils import validate_location_data, get_period_filter
 import logging
@@ -260,7 +261,6 @@ class PlaceService:
             raise
 
     @staticmethod
-    @staticmethod
     def search_places(query, limit=15):
         """
         データベースに登録されている場所を検索する
@@ -296,7 +296,7 @@ class PlaceService:
     def search_places_for_post(query, lat=None, lon=None, limit=10):
         """
         Google Places APIを使用して投稿用の場所を検索する
-        
+
         Args:
             query: 検索クエリ
             lat: 現在地の緯度（オプション）
@@ -304,7 +304,11 @@ class PlaceService:
             limit: 取得する結果の最大数
         """
         try:
-            API_KEY = 'SECRET_API_KEY'
+            API_KEY = settings.GOOGLE_PLACES_API_KEY
+            if not API_KEY:
+                logger.error("Google Places API key is not configured")
+                raise Exception('Google Places API key is not configured')
+
             url = f'https://maps.googleapis.com/maps/api/place/textsearch/json?query={query}&key={API_KEY}&language=ja'
             
             if lat and lon:

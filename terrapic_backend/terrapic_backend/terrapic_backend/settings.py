@@ -256,3 +256,6 @@ GDAL_LIBRARY_PATH = os.getenv('GDAL_LIBRARY_PATH', '/lib/aarch64-linux-gnu/libgd
 # 他の設定と合わせて使用
 if not os.path.isfile(GDAL_LIBRARY_PATH):
     raise FileNotFoundError(f"GDAL library not found at {GDAL_LIBRARY_PATH}")
+
+# Google Places API設定
+GOOGLE_PLACES_API_KEY = os.environ.get('GOOGLE_PLACES_API_KEY', '')
