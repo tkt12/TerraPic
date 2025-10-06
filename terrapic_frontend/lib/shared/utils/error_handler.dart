@@ -8,6 +8,7 @@
 /// - エラーのログ記録
 /// - エラーの種類に応じた処理
 ///
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class ErrorHandler {
@@ -60,10 +61,12 @@ class ErrorHandler {
   /// エラーをログに記録
   static void logError(String message, dynamic error, StackTrace? stackTrace) {
     // TODO: エラーログの実装（Firebaseなど）
-    print('Error: $message');
-    print('Details: $error');
-    if (stackTrace != null) {
-      print('StackTrace: $stackTrace');
+    if (kDebugMode) {
+      debugPrint('Error: $message');
+      debugPrint('Details: $error');
+      if (stackTrace != null) {
+        debugPrint('StackTrace: $stackTrace');
+      }
     }
   }
 

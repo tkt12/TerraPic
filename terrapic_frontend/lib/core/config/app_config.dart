@@ -6,7 +6,7 @@ class AppConfig {
   // デフォルトではローカル開発環境のURLを使用
   static const String backendUrl = String.fromEnvironment('BACKEND_URL',
       defaultValue: 'http://localhost:8000');
-  // defaultValue: 'http://192.168.244.245:8000');
+  // defaultValue: 'http://192.168.100.13:8000');
 
   // APIエンドポイント
   static const String loginEndpoint = '/api/token/';

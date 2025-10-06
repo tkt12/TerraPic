@@ -10,6 +10,7 @@
 /// - ユーザーの検索と表示
 /// - 検索結果のリアルタイム更新
 ///
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:terrapic_frontend/features/main/screens/main_screen.dart';
@@ -355,7 +356,9 @@ class _SearchScreenState extends State<SearchScreen> {
       );
     } catch (e) {
       _showError('投稿の表示中にエラーが発生しました: $e');
-      print('Error in _navigateToPostDetail: $e');
+      if (kDebugMode) {
+        debugPrint('Error in _navigateToPostDetail: $e');
+      }
     }
   }
 

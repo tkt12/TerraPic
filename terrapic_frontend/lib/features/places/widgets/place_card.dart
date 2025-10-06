@@ -9,6 +9,7 @@
 /// - 投稿数と評価の表示
 /// - タップによる詳細画面への遷移
 ///
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class PlaceCard extends StatelessWidget {
@@ -48,7 +49,9 @@ class PlaceCard extends StatelessWidget {
                             height: 100,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
-                              print('Error loading image: $error');
+                              if (kDebugMode) {
+                                debugPrint('Error loading image: $error');
+                              }
                               return Container(
                                 width: 100,
                                 height: 100,

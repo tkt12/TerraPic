@@ -10,6 +10,7 @@
 /// - ルーティングの設定
 /// - テーマの設定
 ///
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
@@ -67,7 +68,9 @@ Future<void> _initializeApp() async {
     // アプリの向きを縦画面に固定
     await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   } catch (e) {
-    print('Initialization error: $e');
+    if (kDebugMode) {
+      debugPrint('Initialization error: $e');
+    }
   }
 }
 

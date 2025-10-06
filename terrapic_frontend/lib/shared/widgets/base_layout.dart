@@ -51,7 +51,6 @@ class BaseLayout extends StatelessWidget {
               unselectedItemColor: Colors.grey,
             ),
             colorScheme: const ColorScheme.light(
-              background: Colors.white,
               surface: Colors.white,
               primary: Colors.blue,
             ),

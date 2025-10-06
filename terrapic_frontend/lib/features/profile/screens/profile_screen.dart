@@ -10,6 +10,7 @@
 /// - お気に入りの場所の表示
 /// - プロフィール編集
 ///
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:terrapic_frontend/core/config/app_config.dart';
 import 'dart:convert';
@@ -173,7 +174,9 @@ class _ProfileScreenState extends State<ProfileScreen>
     try {
       // トークンの確認
       final token = await _authService.getAccessToken();
-      print('Loading profile with token: $token');
+      if (kDebugMode) {
+        debugPrint('Loading profile with token: $token');
+      }
 
       // 3つのAPIリクエストを並列で実行
       final results = await Future.wait([
@@ -219,7 +222,9 @@ class _ProfileScreenState extends State<ProfileScreen>
         _isLoadingFavorites = false;
       });
     } catch (e) {
-      print('Error loading profile data: $e');
+      if (kDebugMode) {
+        debugPrint('Error loading profile data: $e');
+      }
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -413,8 +418,9 @@ class _ProfileScreenState extends State<ProfileScreen>
         ),
       );
 
-      // エラーをログに記録
-      print('Error in _navigateToPostDetail: $e');
+      if (kDebugMode) {
+        debugPrint('Error in _navigateToPostDetail: $e');
+      }
     }
   }
 

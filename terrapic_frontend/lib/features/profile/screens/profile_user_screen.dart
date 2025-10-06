@@ -9,6 +9,7 @@
 /// - フォロー/アンフォロー
 /// - タブによる表示切り替え
 ///
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import '../../../shared/widgets/base_layout.dart';
@@ -280,8 +281,9 @@ class _UserProfileScreenState extends State<UserProfileScreen>
         ),
       );
 
-      // エラーをログに記録
-      print('Error in _navigateToPostDetail: $e');
+      if (kDebugMode) {
+        debugPrint('Error in _navigateToPostDetail: $e');
+      }
     }
   }
 

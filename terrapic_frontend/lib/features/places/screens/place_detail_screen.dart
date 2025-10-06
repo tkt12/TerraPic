@@ -10,6 +10,7 @@
 /// - お気に入り登録
 /// - 写真スポットの表示
 ///
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -107,7 +108,9 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
         });
       }
     } catch (e) {
-      print('Error checking favorite status: $e');
+      if (kDebugMode) {
+        debugPrint('Error checking favorite status: $e');
+      }
     }
   }
 
@@ -197,7 +200,9 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
       );
     } catch (e) {
       ErrorHandler.showError(context, 'エラーが発生しました: $e');
-      print('Error in _navigateToPostDetail: $e');
+      if (kDebugMode) {
+        debugPrint('Error in _navigateToPostDetail: $e');
+      }
     }
   }
 

@@ -10,6 +10,7 @@
 /// - エラーメッセージの表示
 /// - サインアップ画面への遷移
 ///
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -68,7 +69,9 @@ class _LoginScreenState extends State<LoginScreen> {
         _showErrorDialog(result['message']);
       }
     } catch (e) {
-      print('Login error: $e');
+      if (kDebugMode) {
+        debugPrint('Login error: $e');
+      }
       if (!mounted) return;
       _showErrorDialog('ログイン処理中にエラーが発生しました');
     } finally {
@@ -112,7 +115,6 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
         colorScheme: const ColorScheme.light(
-          background: Colors.white,
           surface: Colors.white,
           primary: Colors.blue,
         ),

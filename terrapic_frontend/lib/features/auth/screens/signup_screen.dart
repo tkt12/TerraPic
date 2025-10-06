@@ -202,7 +202,6 @@ class _SignupScreenState extends State<SignupScreen> {
           ),
         ),
         colorScheme: const ColorScheme.light(
-          background: Colors.white,
           surface: Colors.white,
           primary: Colors.blue,
         ),

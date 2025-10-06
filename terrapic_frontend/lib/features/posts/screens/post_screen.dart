@@ -9,6 +9,7 @@
 /// - 投稿詳細（説明、評価など）の入力
 /// - 投稿データのアップロード
 ///
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
@@ -72,7 +73,9 @@ class _PostScreenState extends State<PostScreen> {
   ///
   Future<void> _pickImage() async {
     try {
-      print("画像選択を開始します"); // デバッグログ
+      if (kDebugMode) {
+        debugPrint("画像選択を開始します");
+      }
       final pickedFile = await _picker.pickImage(
         source: ImageSource.gallery,
         imageQuality: 85,
@@ -81,7 +84,9 @@ class _PostScreenState extends State<PostScreen> {
       if (!mounted) return;
 
       if (pickedFile != null) {
-        print("画像が選択されました: ${pickedFile.path}"); // デバッグログ
+        if (kDebugMode) {
+          debugPrint("画像が選択されました: ${pickedFile.path}");
+        }
         // 画像が選択された場合、詳細入力画面に遷移
         await Navigator.push(
           // pushReplacement から push に変更
@@ -91,13 +96,17 @@ class _PostScreenState extends State<PostScreen> {
           ),
         );
       } else {
-        print("画像選択がキャンセルされました"); // デバッグログ
+        if (kDebugMode) {
+          debugPrint("画像選択がキャンセルされました");
+        }
         // 画像が選択されなかった場合、ホーム画面に戻る
         Navigator.of(context).pop(); // まずモーダルを閉じる
         if (mounted) _returnToHome(); // その後ホームに戻る
       }
     } catch (e) {
-      print("エラーが発生しました: $e"); // デバッグログ
+      if (kDebugMode) {
+        debugPrint("エラーが発生しました: $e");
+      }
       if (!mounted) return;
       _showError('画像の選択中にエラーが発生しました');
       Navigator.of(context).pop(); // まずモーダルを閉じる

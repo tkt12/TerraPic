@@ -63,7 +63,9 @@ class AuthProvider extends ChangeNotifier {
       // エラーが発生した場合は未認証状態に
       _isAuthenticated = false;
       _userId = null;
-      print('認証の初期化に失敗しました: $e');
+      if (kDebugMode) {
+        debugPrint('認証の初期化に失敗しました: $e');
+      }
     } finally {
       // 初期化完了後の状態設定
       _isLoading = false;
@@ -86,13 +88,19 @@ class AuthProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    print('Start login process');
-    print('Request payload: email=$email');
+    if (kDebugMode) {
+      debugPrint('Start login process');
+      debugPrint('Request payload: email=$email');
+    }
 
     try {
-      print('AuthProvider: Starting login process');
+      if (kDebugMode) {
+        debugPrint('AuthProvider: Starting login process');
+      }
       final result = await _authService.login(email, password);
-      print('AuthProvider: Login result received: $result');
+      if (kDebugMode) {
+        debugPrint('AuthProvider: Login result received: $result');
+      }
       if (result['success']) {
         // ログイン成功時の状態更新
         _userId = await _authService.getCurrentUserId();
@@ -102,7 +110,9 @@ class AuthProvider extends ChangeNotifier {
 
       return result;
     } catch (e) {
-      print('AuthProvider: Login error: $e');
+      if (kDebugMode) {
+        debugPrint('AuthProvider: Login error: $e');
+      }
       // エラー発生時は未認証状態に
       _isAuthenticated = false;
       _userId = null;
@@ -130,7 +140,9 @@ class AuthProvider extends ChangeNotifier {
       _isAuthenticated = false;
       _userId = null;
     } catch (e) {
-      print('ログアウト処理中にエラーが発生しました: $e');
+      if (kDebugMode) {
+        debugPrint('ログアウト処理中にエラーが発生しました: $e');
+      }
     } finally {
       _isLoading = false;
       notifyListeners();

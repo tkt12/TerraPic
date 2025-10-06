@@ -8,6 +8,7 @@
 /// - 地図上での場所選択
 /// - 写真スポットの位置指定
 /// - 選択した場所の確認と保存
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -227,7 +228,9 @@ class _PhotoSpotPickerState extends State<PhotoSpotPicker> {
 
   /// マーカーを追加
   void _addMarker(LatLng position) {
-    print('Adding marker at position: $position'); // デバッグ用
+    if (kDebugMode) {
+      debugPrint('Adding marker at position: $position');
+    }
     setState(() {
       _markers.clear();
       _markers.add(
@@ -236,7 +239,9 @@ class _PhotoSpotPickerState extends State<PhotoSpotPicker> {
           position: position,
           draggable: true,
           onDragEnd: (newPosition) {
-            print('Marker dragged to: $newPosition'); // デバッグ用
+            if (kDebugMode) {
+              debugPrint('Marker dragged to: $newPosition');
+            }
             setState(() => _selectedLocation = newPosition);
           },
         ),
@@ -270,7 +275,9 @@ class _PhotoSpotPickerState extends State<PhotoSpotPicker> {
             onMapCreated: (controller) => _mapController = controller,
             markers: _markers,
             onTap: (position) {
-              print('Map tapped at: $position'); // デバッグ用
+              if (kDebugMode) {
+                debugPrint('Map tapped at: $position');
+              }
               _addMarker(position);
               _selectedLocation = position; // 位置を更新
             },
@@ -305,13 +312,17 @@ class _PhotoSpotPickerState extends State<PhotoSpotPicker> {
               child: SafeArea(
                 child: ElevatedButton(
                   onPressed: () {
-                    print('Selected photo spot location: $_selectedLocation');
-                    print('Original place: ${widget.place}');
+                    if (kDebugMode) {
+                      debugPrint('Selected photo spot location: $_selectedLocation');
+                      debugPrint('Original place: ${widget.place}');
+                    }
                     final updatedPlace = widget.place.copyWithPhotoSpot(
                       photoSpotLatitude: _selectedLocation.latitude,
                       photoSpotLongitude: _selectedLocation.longitude,
                     );
-                    print('Updated place: $updatedPlace');
+                    if (kDebugMode) {
+                      debugPrint('Updated place: $updatedPlace');
+                    }
                     Navigator.pop(context, updatedPlace);
                   },
                   style: ElevatedButton.styleFrom(

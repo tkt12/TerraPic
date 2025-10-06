@@ -8,6 +8,7 @@
 /// - 日付の標準フォーマット
 /// - 日本語対応
 ///
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -53,7 +54,9 @@ class DateFormatter {
         return formatter.format(dateTime);
       }
     } catch (e) {
-      print('Date formatting error: $e');
+      if (kDebugMode) {
+        debugPrint('Date formatting error: $e');
+      }
       // エラー時は基本的なフォーマットを使用
       return dateTime.toString().split('.')[0];
     }
@@ -67,7 +70,9 @@ class DateFormatter {
       }
       return DateFormat('yyyy年MM月dd日', 'ja_JP').format(date);
     } catch (e) {
-      print('Date formatting error: $e');
+      if (kDebugMode) {
+        debugPrint('Date formatting error: $e');
+      }
       return date.toString().split(' ')[0];
     }
   }
@@ -80,7 +85,9 @@ class DateFormatter {
       }
       return DateFormat('HH:mm', 'ja_JP').format(time);
     } catch (e) {
-      print('Time formatting error: $e');
+      if (kDebugMode) {
+        debugPrint('Time formatting error: $e');
+      }
       return time.toString().split(' ')[1].substring(0, 5);
     }
   }
@@ -93,7 +100,9 @@ class DateFormatter {
       }
       return DateFormat('yyyy年MM月dd日 HH:mm', 'ja_JP').format(dateTime);
     } catch (e) {
-      print('DateTime formatting error: $e');
+      if (kDebugMode) {
+        debugPrint('DateTime formatting error: $e');
+      }
       return dateTime.toString().split('.')[0];
     }
   }

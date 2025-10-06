@@ -3,6 +3,7 @@
 /// 投稿写真をグリッド形式で表示するウィジェット。
 /// プロフィール画面や場所詳細画面などで使用される。
 ///
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -71,12 +72,16 @@ class _PostsGridState extends State<PostsGrid> {
             _imagePreloadFutures[fullUrl] = DefaultCacheManager()
                 .downloadFile(fullUrl)
                 .onError((error, stackTrace) {
-              print('Failed to preload image $fullUrl: $error');
+              if (kDebugMode) {
+                debugPrint('Failed to preload image $fullUrl: $error');
+              }
               throw error!; // エラーを再スロー
             });
           }
         } catch (e) {
-          print('Error processing image URL: $e');
+          if (kDebugMode) {
+            debugPrint('Error processing image URL: $e');
+          }
         }
       }
     }
@@ -117,10 +122,12 @@ class _PostsGridState extends State<PostsGrid> {
       index: dataIndex, // グリッドインデックスではなくデータインデックスを使用
     );
 
-    print('Building PostItem:');
-    print('Post ID: ${post['id']}');
-    print('Grid Index: $index');
-    print('URL: $fullImageUrl');
+    if (kDebugMode) {
+      debugPrint('Building PostItem:');
+      debugPrint('Post ID: ${post['id']}');
+      debugPrint('Grid Index: $index');
+      debugPrint('URL: $fullImageUrl');
+    }
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
@@ -136,7 +143,9 @@ class _PostsGridState extends State<PostsGrid> {
             '_data_index': index,
             '_original_data': post, // 元のデータも保持
           };
-          print('Tapped post data: $postData');
+          if (kDebugMode) {
+            debugPrint('Tapped post data: $postData');
+          }
           widget.onPostTap(postData);
         },
         child: Hero(
@@ -148,7 +157,9 @@ class _PostsGridState extends State<PostsGrid> {
               return frame == null ? _buildPlaceholder() : child;
             },
             errorBuilder: (context, error, stackTrace) {
-              print('Image load error for $fullImageUrl: $error');
+              if (kDebugMode) {
+                debugPrint('Image load error for $fullImageUrl: $error');
+              }
               return _buildPlaceholder();
             },
           ),

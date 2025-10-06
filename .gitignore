@@ -54,3 +54,9 @@ terrapic_frontend/android/local.properties
 
 # Docker
 *.dockerignore
+
+# Claude Code
+.claude/
+
+# iOS Secrets
+terrapic_frontend/ios/Flutter/Secrets.xcconfig

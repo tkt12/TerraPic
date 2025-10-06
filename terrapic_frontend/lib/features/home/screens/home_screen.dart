@@ -10,6 +10,7 @@
 /// - 場所の詳細情報の表示
 /// - 写真スポットの表示
 ///
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -97,13 +98,10 @@ class _HomeScreenState extends State<HomeScreen>
   Future<void> _loadMapStyle() async {
     try {
       _mapStyle = await rootBundle.loadString('assets/map_style_nature.json');
-
-      // 地図コントローラーが初期化済みの場合はスタイルを適用
-      if (mapController != null) {
-        await mapController!.setMapStyle(_mapStyle);
-      }
     } catch (e) {
-      print('地図スタイルの読み込みに失敗しました: $e');
+      if (kDebugMode) {
+        debugPrint('地図スタイルの読み込みに失敗しました: $e');
+      }
     }
   }
 
@@ -193,7 +191,9 @@ class _HomeScreenState extends State<HomeScreen>
       );
       await _fetchVisibleMarkers();
     } catch (e) {
-      print('Error moving to current location: $e');
+      if (kDebugMode) {
+        debugPrint('Error moving to current location: $e');
+      }
     }
   }
 
@@ -216,19 +216,23 @@ class _HomeScreenState extends State<HomeScreen>
       if (response.statusCode == 200) {
         final List<dynamic> places =
             json.decode(utf8.decode(response.bodyBytes));
-        print("API Response Data:");
-        print(json.encode(places)); // レスポンスデータの全体を出力
+        if (kDebugMode) {
+          debugPrint("API Response Data:");
+          debugPrint(json.encode(places));
 
-        // 各場所のpostsデータも確認
-        for (var place in places) {
-          print("Place ID: ${place['id']}");
-          print("Posts data:");
-          print(json.encode(place['posts'])); // 写真スポットデータを出力
+          // 各場所のpostsデータも確認
+          for (var place in places) {
+            debugPrint("Place ID: ${place['id']}");
+            debugPrint("Posts data:");
+            debugPrint(json.encode(place['posts']));
+          }
         }
         _updateMarkers(places, zoomLevel);
       }
     } catch (e) {
-      print('Error fetching markers: $e');
+      if (kDebugMode) {
+        debugPrint('Error fetching markers: $e');
+      }
     }
   }
 
@@ -238,8 +242,10 @@ class _HomeScreenState extends State<HomeScreen>
 
     setState(() {
       _visibleMarkers.clear();
-      print("Updating markers - Zoom Level: $zoomLevel");
-      print("Showing Photo Spots: $shouldShowPhotoSpots");
+      if (kDebugMode) {
+        debugPrint("Updating markers - Zoom Level: $zoomLevel");
+        debugPrint("Showing Photo Spots: $shouldShowPhotoSpots");
+      }
 
       for (var place in places) {
         if (place['post_count'] > 0) {
@@ -258,14 +264,18 @@ class _HomeScreenState extends State<HomeScreen>
   /// 写真スポットのマーカーを追加
   void _addPhotoSpotMarkers(Map<String, dynamic> place) {
     final posts = place['posts'] as List<dynamic>;
-    print(
-        "Adding Photo Spot Markers for place: ${place['id']} with ${posts.length} posts");
+    if (kDebugMode) {
+      debugPrint(
+          "Adding Photo Spot Markers for place: ${place['id']} with ${posts.length} posts");
+    }
 
     for (var post in posts) {
       if (post['photo_spot_location'] != null) {
         final photoSpot = post['photo_spot_location'];
-        print(
-            "Adding marker for post ${post['id']} at ${photoSpot['latitude']}, ${photoSpot['longitude']}");
+        if (kDebugMode) {
+          debugPrint(
+              "Adding marker for post ${post['id']} at ${photoSpot['latitude']}, ${photoSpot['longitude']}");
+        }
 
         _visibleMarkers.add(
           Marker(
@@ -291,8 +301,10 @@ class _HomeScreenState extends State<HomeScreen>
 
   /// 場所のマーカーを追加
   void _addPlaceMarker(Map<String, dynamic> place) {
-    print(
-        "Adding Place Marker for place: ${place['id']} at ${place['latitude']}, ${place['longitude']}");
+    if (kDebugMode) {
+      debugPrint(
+          "Adding Place Marker for place: ${place['id']} at ${place['latitude']}, ${place['longitude']}");
+    }
 
     _visibleMarkers.add(
       Marker(
@@ -365,7 +377,9 @@ class _HomeScreenState extends State<HomeScreen>
 
       return mapController!.animateCamera(CameraUpdate.newLatLng(newCenter));
     } catch (e) {
-      print('Error animating camera: $e');
+      if (kDebugMode) {
+        debugPrint('Error animating camera: $e');
+      }
     }
   }
 
@@ -445,10 +459,8 @@ class _HomeScreenState extends State<HomeScreen>
               ),
               onMapCreated: (controller) {
                 mapController = controller;
-                if (_mapStyle != null) {
-                  controller.setMapStyle(_mapStyle!);
-                }
               },
+              style: _mapStyle,
               myLocationEnabled: _permissionGranted == PermissionStatus.granted,
               myLocationButtonEnabled: false,
               markers: _visibleMarkers,
@@ -459,7 +471,9 @@ class _HomeScreenState extends State<HomeScreen>
                   const Duration(milliseconds: 500),
                   () async {
                     final zoom = await mapController!.getZoomLevel();
-                    print("Current Zoom Level: $zoom");
+                    if (kDebugMode) {
+                      debugPrint("Current Zoom Level: $zoom");
+                    }
                     _fetchVisibleMarkers();
                   },
                 );

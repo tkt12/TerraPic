@@ -9,6 +9,7 @@
 /// - ユーザーIDの取得
 /// - トークンの有効期限管理
 ///
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -40,7 +41,9 @@ class AuthService {
 
       return payload['user_id']?.toString();
     } catch (e) {
-      print('Error getting current user ID: $e');
+      if (kDebugMode) {
+        debugPrint('Error getting current user ID: $e');
+      }
       return null;
     }
   }
@@ -54,16 +57,22 @@ class AuthService {
   /// 失敗時は {'success': false, 'message': 'エラーメッセージ'} を返す
   Future<Map<String, dynamic>> login(String email, String password) async {
     try {
-      print('Preparing login request...');
+      if (kDebugMode) {
+        debugPrint('Preparing login request...');
+      }
       final url =
           Uri.parse('${AppConfig.backendUrl}${AppConfig.loginEndpoint}');
-      print('Request URL: $url');
+      if (kDebugMode) {
+        debugPrint('Request URL: $url');
+      }
 
       final requestBody = jsonEncode({
         'email': email,
         'password': password,
       });
-      print('Request body: $requestBody');
+      if (kDebugMode) {
+        debugPrint('Request body: $requestBody');
+      }
 
       final response = await http
           .post(
@@ -76,7 +85,9 @@ class AuthService {
           .timeout(
         const Duration(seconds: 10),
         onTimeout: () {
-          print('Request timeout');
+          if (kDebugMode) {
+            debugPrint('Request timeout');
+          }
           throw TimeoutException('Request timeout');
         },
       );
@@ -91,8 +102,10 @@ class AuthService {
         return {'success': false, 'message': _parseErrorResponse(response)};
       }
     } catch (e, stackTrace) {
-      print('Login error: $e');
-      print('Stack trace: $stackTrace');
+      if (kDebugMode) {
+        debugPrint('Login error: $e');
+        debugPrint('Stack trace: $stackTrace');
+      }
       return {'success': false, 'message': 'エラーが発生しました: ${e.toString()}'};
     }
   }
@@ -163,7 +176,9 @@ class AuthService {
       }
       return false;
     } catch (e) {
-      print('Token refresh failed: $e');
+      if (kDebugMode) {
+        debugPrint('Token refresh failed: $e');
+      }
       return false;
     }
   }
@@ -195,8 +210,9 @@ class AuthService {
       throw Exception('認証トークンがありません');
     }
 
-    // デバッグ用
-    print('Using token: $token');
+    if (kDebugMode) {
+      debugPrint('Using token: $token');
+    }
 
     // ヘッダーの設定
     final defaultHeaders = {
@@ -206,9 +222,10 @@ class AuthService {
 
     final mergedHeaders = {...defaultHeaders, ...?headers};
 
-    // デバッグ用
-    print('Request headers: $mergedHeaders');
-    print('Request path: ${AppConfig.backendUrl}$path');
+    if (kDebugMode) {
+      debugPrint('Request headers: $mergedHeaders');
+      debugPrint('Request path: ${AppConfig.backendUrl}$path');
+    }
 
     // リクエストの実行
     http.Response response;
@@ -229,9 +246,10 @@ class AuthService {
           response = await http.get(url, headers: mergedHeaders);
       }
 
-      // デバッグ用
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
+      if (kDebugMode) {
+        debugPrint('Response status: ${response.statusCode}');
+        debugPrint('Response body: ${response.body}');
+      }
 
       // 401エラーの場合はトークンの更新を試みる
       if (response.statusCode == 401) {
@@ -245,7 +263,9 @@ class AuthService {
 
       return response;
     } catch (e) {
-      print('Request error: $e');
+      if (kDebugMode) {
+        debugPrint('Request error: $e');
+      }
       rethrow;
     }
   }

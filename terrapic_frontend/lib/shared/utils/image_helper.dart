@@ -9,6 +9,7 @@
 /// - 画像のキャッシュ管理
 /// - 画像の圧縮と最適化
 ///
+import 'package:flutter/foundation.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import '../../../core/config/app_config.dart';
 import 'dart:io';
@@ -23,7 +24,9 @@ class ImageHelper {
     try {
       await _cacheManager.downloadFile(imageUrl);
     } catch (e) {
-      print('Error preloading image: $e');
+      if (kDebugMode) {
+        debugPrint('Error preloading image: $e');
+      }
     }
   }
 
@@ -46,7 +49,9 @@ class ImageHelper {
       final fileInfo = await _cacheManager.getFileFromCache(imageUrl);
       return fileInfo?.file;
     } catch (e) {
-      print('Error getting cached image: $e');
+      if (kDebugMode) {
+        debugPrint('Error getting cached image: $e');
+      }
       return null;
     }
   }
@@ -56,7 +61,9 @@ class ImageHelper {
     try {
       await _cacheManager.downloadFile(imageUrl);
     } catch (e) {
-      print('Error caching image: $e');
+      if (kDebugMode) {
+        debugPrint('Error caching image: $e');
+      }
     }
   }
 
@@ -65,7 +72,9 @@ class ImageHelper {
     try {
       await _cacheManager.removeFile(imageUrl);
     } catch (e) {
-      print('Error removing image from cache: $e');
+      if (kDebugMode) {
+        debugPrint('Error removing image from cache: $e');
+      }
     }
   }
 
@@ -74,7 +83,9 @@ class ImageHelper {
     try {
       await _cacheManager.emptyCache();
     } catch (e) {
-      print('Error clearing image cache: $e');
+      if (kDebugMode) {
+        debugPrint('Error clearing image cache: $e');
+      }
     }
   }
 
@@ -84,7 +95,9 @@ class ImageHelper {
       final fileInfo = await _cacheManager.getFileFromCache(imageUrl);
       return fileInfo != null;
     } catch (e) {
-      print('Error checking image cache status: $e');
+      if (kDebugMode) {
+        debugPrint('Error checking image cache status: $e');
+      }
       return false;
     }
   }
@@ -111,7 +124,9 @@ class ImageHelper {
       final data = await readExifFromBytes(bytes);
 
       if (data.isEmpty) {
-        print('No EXIF data found in image');
+        if (kDebugMode) {
+          debugPrint('No EXIF data found in image');
+        }
         return null;
       }
 
@@ -125,7 +140,9 @@ class ImageHelper {
           gpsLatitudeRef == null ||
           gpsLongitude == null ||
           gpsLongitudeRef == null) {
-        print('GPS data not found in EXIF');
+        if (kDebugMode) {
+          debugPrint('GPS data not found in EXIF');
+        }
         return null;
       }
 
@@ -142,14 +159,20 @@ class ImageHelper {
       );
 
       if (lat == null || lng == null) {
-        print('Failed to convert GPS coordinates');
+        if (kDebugMode) {
+          debugPrint('Failed to convert GPS coordinates');
+        }
         return null;
       }
 
-      print('Found GPS coordinates: $lat, $lng');
+      if (kDebugMode) {
+        debugPrint('Found GPS coordinates: $lat, $lng');
+      }
       return LatLng(lat, lng);
     } catch (e) {
-      print('Error reading EXIF data: $e');
+      if (kDebugMode) {
+        debugPrint('Error reading EXIF data: $e');
+      }
       return null;
     }
   }
@@ -175,7 +198,9 @@ class ImageHelper {
 
       return decimal;
     } catch (e) {
-      print('Error converting GPS coordinates: $e');
+      if (kDebugMode) {
+        debugPrint('Error converting GPS coordinates: $e');
+      }
       return null;
     }
   }

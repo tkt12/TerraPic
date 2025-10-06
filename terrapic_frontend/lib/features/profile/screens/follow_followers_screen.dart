@@ -9,6 +9,7 @@
 /// - ユーザープロフィールへの遷移
 /// - ページネーション
 ///
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../../shared/widgets/base_layout.dart';
 import '../../../features/auth/services/auth_service.dart';
@@ -72,7 +73,9 @@ class _FollowListScreenState extends State<FollowListScreen> {
         setState(() => currentUserId = id);
       }
     } catch (e) {
-      print('Error getting current user ID: $e');
+      if (kDebugMode) {
+        debugPrint('Error getting current user ID: $e');
+      }
     }
   }
 

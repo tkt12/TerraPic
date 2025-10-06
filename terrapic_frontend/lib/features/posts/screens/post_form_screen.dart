@@ -10,6 +10,7 @@
 /// - 写真スポットの位置情報保存
 /// - 投稿データのアップロード
 ///
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -78,7 +79,9 @@ class PostFormScreenState extends State<PostFormScreen> {
         );
       }
     } catch (e) {
-      print('Error loading location from image: $e');
+      if (kDebugMode) {
+        debugPrint('Error loading location from image: $e');
+      }
       // エラーが発生してもユーザーには通知せず、手動選択に任せる
     }
   }

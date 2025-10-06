@@ -10,6 +10,7 @@
 /// - 撮影場所への経路案内
 /// - ユーザープロフィールへの遷移
 /// - アニメーション付きのいいね表示
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'dart:math' as math;
@@ -81,8 +82,10 @@ class _PostDetailScreenState extends State<PostDetailScreen>
     // 投稿データの受け取りをそのまま使用（再正規化しない）
     _normalizedPosts = widget.posts;
 
-    print('Initial normalized posts:');
-    _normalizedPosts.take(3).forEach((p) => print('ID: ${p['id']}'));
+    if (kDebugMode) {
+      debugPrint('Initial normalized posts:');
+      _normalizedPosts.take(3).forEach((p) => debugPrint('ID: ${p['id']}'));
+    }
 
     // キーの生成
     _itemKeys
@@ -107,12 +110,13 @@ class _PostDetailScreenState extends State<PostDetailScreen>
       _showDoubleTapLike[post['id']] = false;
     }
 
-    // デバッグ出力を追加
-    print('PostDetailScreen initialized with:');
-    print('Selected Index: ${widget.selectedIndex}');
-    print('Posts length: ${widget.posts.length}');
-    print('First few posts:');
-    widget.posts.take(3).forEach((post) => print('Post ID: ${post['id']}'));
+    if (kDebugMode) {
+      debugPrint('PostDetailScreen initialized with:');
+      debugPrint('Selected Index: ${widget.selectedIndex}');
+      debugPrint('Posts length: ${widget.posts.length}');
+      debugPrint('First few posts:');
+      widget.posts.take(3).forEach((post) => debugPrint('Post ID: ${post['id']}'));
+    }
   }
 
   @override
@@ -146,7 +150,9 @@ class _PostDetailScreenState extends State<PostDetailScreen>
         });
       }
     } catch (e) {
-      print('Error fetching like status: $e');
+      if (kDebugMode) {
+        debugPrint('Error fetching like status: $e');
+      }
     }
   }
 
@@ -325,7 +331,9 @@ class _PostDetailScreenState extends State<PostDetailScreen>
               width: double.infinity,
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
-                print('Image error: $error');
+                if (kDebugMode) {
+                  debugPrint('Image error: $error');
+                }
                 return const Center(child: Icon(Icons.error));
               },
             ),
