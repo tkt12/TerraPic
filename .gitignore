@@ -60,3 +60,4 @@ terrapic_frontend/android/local.properties
 
 # iOS Secrets
 terrapic_frontend/ios/Flutter/Secrets.xcconfig
+terrapic_frontend/android/gradle.properties
