@@ -26,6 +26,8 @@ db.sqlite3
 db.sqlite3-journal
 /media
 /staticfiles
+terrapic_backend/media/
+terrapic_backend/staticfiles/
 
 # Virtual environments
 venv/
