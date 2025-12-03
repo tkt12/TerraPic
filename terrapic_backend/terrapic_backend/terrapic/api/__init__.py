@@ -3,7 +3,7 @@ from .place import (
     NearbyPlacesView, PlaceSearchView, FavoriteView, 
     FavoriteStatusView, get_top_photo, place_details,
 )
-from .post import CreatePostView, LikeView, LikeStatusView
+from .post import CreatePostView, LikeView, LikeStatusView, delete_post, update_post
 from .profile import (
     profile, profile_edit, user_profile, 
     follow_toggle, get_followers, get_following,
@@ -32,6 +32,8 @@ __all__ = [
     'CreatePostView',
     'LikeView',
     'LikeStatusView',
+    'delete_post',
+    'update_post',
     
     # Profile関連
     'profile',

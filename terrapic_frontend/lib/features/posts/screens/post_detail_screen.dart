@@ -122,7 +122,9 @@ class _PostDetailScreenState extends State<PostDetailScreen>
       debugPrint('Selected Index: ${widget.selectedIndex}');
       debugPrint('Posts length: ${widget.posts.length}');
       debugPrint('First few posts:');
-      widget.posts.take(3).forEach((post) => debugPrint('Post ID: ${post['id']}'));
+      widget.posts
+          .take(3)
+          .forEach((post) => debugPrint('Post ID: ${post['id']}'));
     }
   }
 
@@ -323,12 +325,12 @@ class _PostDetailScreenState extends State<PostDetailScreen>
               ? [
                   IconButton(
                     icon: const Icon(Icons.edit, color: Colors.black),
-                    onPressed: () => _handleEditPost(selectedPost!),
+                    onPressed: () => _handleEditPost(selectedPost),
                     tooltip: '編集',
                   ),
                   IconButton(
                     icon: const Icon(Icons.delete, color: Colors.black),
-                    onPressed: () => _handleDeletePost(selectedPost!),
+                    onPressed: () => _handleDeletePost(selectedPost),
                     tooltip: '削除',
                   ),
                 ]
