@@ -24,6 +24,7 @@ import '../../../features/auth/services/auth_service.dart';
 import '../../../features/profile/screens/profile_screen.dart';
 import '../../../features/profile/screens/profile_user_screen.dart';
 import '../../../features/places/screens/place_detail_screen.dart';
+import 'post_edit_screen.dart';
 
 class PostDetailScreen extends StatefulWidget {
   final List<Map<String, dynamic>> posts;
@@ -216,10 +217,20 @@ class _PostDetailScreenState extends State<PostDetailScreen>
 
   /// 投稿を編集する
   Future<void> _handleEditPost(Map<String, dynamic> post) async {
-    // TODO: 投稿編集画面への遷移を実装
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('編集機能は準備中です')),
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PostEditScreen(post: post),
+      ),
     );
+
+    // 編集が成功した場合、いいね状態を再取得
+    if (result == true && mounted) {
+      _fetchLikeStatus(post['id']);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('投稿が更新されました')),
+      );
+    }
   }
 
   /// 投稿を削除する
