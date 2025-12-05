@@ -19,7 +19,7 @@ from .api import (
     places_ranking, posts_ranking,
 
     # 検索関連のビュー
-    search
+    search, search_suggestions
 )
 
 urlpatterns = [
@@ -42,6 +42,7 @@ urlpatterns = [
     
     # 検索関連のエンドポイント
     path('api/search/', search, name='search'),
+    path('api/search/suggestions/', search_suggestions, name='search_suggestions'),
     
     # 投稿関連のエンドポイント
     path('api/post/create/', CreatePostView.as_view(), name='create_post'),

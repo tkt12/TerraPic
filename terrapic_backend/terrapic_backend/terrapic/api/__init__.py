@@ -12,7 +12,7 @@ from .profile import (
 from .ranking import (
     places_ranking, posts_ranking
 )
-from .search import search
+from .search import search, search_suggestions
 
 __all__ = [
     # 認証関連
@@ -51,4 +51,5 @@ __all__ = [
     
     # Search関連
     'search',
+    'search_suggestions',
 ]
