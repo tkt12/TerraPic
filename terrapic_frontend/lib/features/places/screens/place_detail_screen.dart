@@ -182,7 +182,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
         throw Exception('Post not found in normalized list');
       }
 
-      Navigator.push(
+      final result = await Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => PostDetailScreen(
@@ -198,6 +198,11 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
           ),
         ),
       );
+
+      // 編集・削除が行われた場合はデータを再読み込み
+      if (result == true && mounted) {
+        await _loadPlaceDetails();
+      }
     } catch (e) {
       ErrorHandler.showError(context, 'エラーが発生しました: $e');
       if (kDebugMode) {

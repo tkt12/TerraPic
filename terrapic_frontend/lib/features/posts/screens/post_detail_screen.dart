@@ -599,12 +599,48 @@ class _PostDetailScreenState extends State<PostDetailScreen>
       ),
     );
 
-    // 編集が成功した場合、いいね状態を再取得
+    // 編集が成功した場合、投稿データを再取得して画面を更新
     if (result == true && mounted) {
-      _fetchLikeStatus(post['id']);
+      await _refreshPostData(post['id']);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('投稿が更新されました')),
       );
+    }
+  }
+
+  /// 投稿データを再取得して更新
+  Future<void> _refreshPostData(int postId) async {
+    try {
+      final response = await _authService.authenticatedRequest(
+        '/api/post/$postId/like/status/',
+      );
+
+      if (!mounted) return;
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final updatedPost = data['post'];
+
+        // リスト内の該当投稿を更新
+        final index = _normalizedPosts.indexWhere((p) => p['id'] == postId);
+        if (index != -1) {
+          setState(() {
+            _normalizedPosts[index] = {
+              ..._normalizedPosts[index],
+              'description': updatedPost['description'],
+              'rating': updatedPost['rating'],
+              'weather': updatedPost['weather'],
+              'season': updatedPost['season'],
+            };
+            _likeStates[postId] = data['is_liked'];
+            _likeCounts[postId] = data['like_count'];
+          });
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Error refreshing post data: $e');
+      }
     }
   }
 
@@ -640,11 +676,21 @@ class _PostDetailScreenState extends State<PostDetailScreen>
       if (!mounted) return;
 
       if (response.statusCode == 204) {
+        // リストから削除された投稿を除外
+        setState(() {
+          _normalizedPosts.removeWhere((p) => p['id'] == post['id']);
+        });
+
+        if (!mounted) return;
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('投稿を削除しました')),
         );
-        // 画面を閉じて前の画面に戻る
-        Navigator.of(context).pop(true);
+
+        // 投稿が全て削除された場合は画面を閉じる
+        if (_normalizedPosts.isEmpty) {
+          Navigator.of(context).pop(true);
+        }
       } else {
         ErrorHandler.showError(context, '投稿の削除に失敗しました');
       }
