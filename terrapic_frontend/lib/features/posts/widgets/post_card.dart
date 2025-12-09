@@ -9,6 +9,7 @@
 /// - いいねの表示と操作
 /// - 場所情報の表示
 /// - 詳細画面への遷移
+/// - 投稿の編集・削除（所有者のみ）
 ///
 import 'package:flutter/material.dart';
 import '../../../shared/utils/date_formatter.dart';
@@ -19,6 +20,9 @@ class PostCard extends StatelessWidget {
   final Function(Map<String, dynamic>)? onPlaceTap;
   final Function(Map<String, dynamic>)? onLikeTap;
   final Function(Map<String, dynamic>)? onTap;
+  final Function(Map<String, dynamic>)? onEditTap;
+  final Function(Map<String, dynamic>)? onDeleteTap;
+  final String? currentUserId;
 
   const PostCard({
     Key? key,
@@ -27,10 +31,18 @@ class PostCard extends StatelessWidget {
     this.onPlaceTap,
     this.onLikeTap,
     this.onTap,
+    this.onEditTap,
+    this.onDeleteTap,
+    this.currentUserId,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    // 現在のユーザーが投稿の所有者かどうかを確認
+    final isOwner = currentUserId != null &&
+        post['user']?['id'] != null &&
+        post['user']['id'].toString() == currentUserId;
+
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
       elevation: 0,
@@ -79,12 +91,12 @@ class PostCard extends StatelessWidget {
                 ],
               ),
             ),
-            trailing: IconButton(
-              icon: const Icon(Icons.more_horiz),
-              onPressed: () {
-                // TODO: 投稿のメニューを表示
-              },
-            ),
+            trailing: isOwner
+                ? IconButton(
+                    icon: const Icon(Icons.more_horiz),
+                    onPressed: () => _showPostMenu(context),
+                  )
+                : null,
           ),
 
           // 投稿画像
@@ -177,6 +189,36 @@ class PostCard extends StatelessWidget {
 
           const SizedBox(height: 8),
         ],
+      ),
+    );
+  }
+
+  /// 投稿メニューを表示
+  void _showPostMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit),
+              title: const Text('編集'),
+              onTap: () {
+                Navigator.pop(context);
+                onEditTap?.call(post);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete, color: Colors.red),
+              title: const Text('削除', style: TextStyle(color: Colors.red)),
+              onTap: () {
+                Navigator.pop(context);
+                onDeleteTap?.call(post);
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
