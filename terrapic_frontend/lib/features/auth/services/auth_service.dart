@@ -239,6 +239,9 @@ class AuthService {
         case 'PUT':
           response = await http.put(url, headers: mergedHeaders, body: body);
           break;
+        case 'PATCH':
+          response = await http.patch(url, headers: mergedHeaders, body: body);
+          break;
         case 'DELETE':
           response = await http.delete(url, headers: mergedHeaders, body: body);
           break;
