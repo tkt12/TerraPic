@@ -114,8 +114,8 @@ class _PostDetailScreenState extends State<PostDetailScreen>
       _showDoubleTapLike[post['id']] = false;
     }
 
-    // 現在のユーザーIDを取得
-    _loadCurrentUserId();
+    // 現在のユーザーIDを取得（同期的に実行）
+    _initializeUserId();
 
     if (kDebugMode) {
       debugPrint('PostDetailScreen initialized with:');
@@ -128,13 +128,24 @@ class _PostDetailScreenState extends State<PostDetailScreen>
     }
   }
 
+  /// 現在のユーザーIDを初期化
+  Future<void> _initializeUserId() async {
+    await _loadCurrentUserId();
+  }
+
   /// 現在のユーザーIDを読み込む
   Future<void> _loadCurrentUserId() async {
     final userId = await _authService.getCurrentUserId();
+    if (kDebugMode) {
+      debugPrint('_loadCurrentUserId - User ID loaded: $userId');
+    }
     if (mounted) {
       setState(() {
         _currentUserId = userId;
       });
+      if (kDebugMode) {
+        debugPrint('_loadCurrentUserId - State updated with User ID: $_currentUserId');
+      }
     }
   }
 
@@ -143,12 +154,26 @@ class _PostDetailScreenState extends State<PostDetailScreen>
     super.didChangeDependencies();
     if (!_hasCalculatedHeights) {
       _hasCalculatedHeights = true;
-      setState(() {
-        _isCalculatingHeights = false;
-      });
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scrollToSelectedItem();
-      });
+      // ユーザーIDを確実に取得してから画面を表示
+      if (_currentUserId == null) {
+        _loadCurrentUserId().then((_) {
+          if (mounted) {
+            setState(() {
+              _isCalculatingHeights = false;
+            });
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _scrollToSelectedItem();
+            });
+          }
+        });
+      } else {
+        setState(() {
+          _isCalculatingHeights = false;
+        });
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _scrollToSelectedItem();
+        });
+      }
     }
   }
 
@@ -292,6 +317,13 @@ class _PostDetailScreenState extends State<PostDetailScreen>
     final isOwner = _currentUserId != null &&
         user['id'] != null &&
         user['id'].toString() == _currentUserId;
+
+    if (kDebugMode) {
+      debugPrint('_buildUserHeader - Post ID: ${post['id']}');
+      debugPrint('  Current User ID: $_currentUserId');
+      debugPrint('  Post User ID: ${user['id']}');
+      debugPrint('  Is Owner: $isOwner');
+    }
 
     return ListTile(
       leading: GestureDetector(
