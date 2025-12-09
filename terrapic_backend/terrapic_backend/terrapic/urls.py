@@ -4,22 +4,22 @@ from .custom_jwt import CustomTokenObtainPairView
 from .api import (
     # 認証関連のビュー
     login_api, signup_api, home,
-    
+
     # プロフィール関連のビュー
     profile, profile_edit, user_profile, follow_toggle, profile_likes, profile_favorites, get_followers, get_following,
-    
+
     # 場所関連のビュー
     NearbyPlacesView, PlaceSearchView, FavoriteView,
     FavoriteStatusView, get_top_photo, place_details,
-    
+
     # 投稿関連のビュー
-    CreatePostView, LikeView, LikeStatusView,
-    
+    CreatePostView, LikeView, LikeStatusView, delete_post, update_post,
+
     # ランキング関連のビュー
     places_ranking, posts_ranking,
-    
+
     # 検索関連のビュー
-    search
+    search, search_suggestions
 )
 
 urlpatterns = [
@@ -42,12 +42,15 @@ urlpatterns = [
     
     # 検索関連のエンドポイント
     path('api/search/', search, name='search'),
+    path('api/search/suggestions/', search_suggestions, name='search_suggestions'),
     
     # 投稿関連のエンドポイント
     path('api/post/create/', CreatePostView.as_view(), name='create_post'),
     path('api/post_place_search/', PlaceSearchView.as_view(), name='search_place_post'),
     path('api/post/<int:post_id>/like/', LikeView.as_view(), name='toggle_like'),
     path('api/post/<int:post_id>/like/status/', LikeStatusView.as_view(), name='like_status'),
+    path('api/post/<int:post_id>/delete/', delete_post, name='delete_post'),
+    path('api/post/<int:post_id>/update/', update_post, name='update_post'),
     
     # ランキングのエンドポイント
     path('api/ranking/places', places_ranking, name='places_ranking'),

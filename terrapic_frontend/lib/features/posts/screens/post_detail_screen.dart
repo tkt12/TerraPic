@@ -24,6 +24,7 @@ import '../../../features/auth/services/auth_service.dart';
 import '../../../features/profile/screens/profile_screen.dart';
 import '../../../features/profile/screens/profile_user_screen.dart';
 import '../../../features/places/screens/place_detail_screen.dart';
+import 'post_edit_screen.dart';
 
 class PostDetailScreen extends StatefulWidget {
   final List<Map<String, dynamic>> posts;
@@ -63,6 +64,9 @@ class _PostDetailScreenState extends State<PostDetailScreen>
 
   // サービス
   final AuthService _authService = AuthService();
+
+  // 現在のユーザーID
+  String? _currentUserId;
 
   // いいね状態の管理
   Map<int, bool> _likeStates = {};
@@ -110,12 +114,27 @@ class _PostDetailScreenState extends State<PostDetailScreen>
       _showDoubleTapLike[post['id']] = false;
     }
 
+    // 現在のユーザーIDを取得
+    _loadCurrentUserId();
+
     if (kDebugMode) {
       debugPrint('PostDetailScreen initialized with:');
       debugPrint('Selected Index: ${widget.selectedIndex}');
       debugPrint('Posts length: ${widget.posts.length}');
       debugPrint('First few posts:');
-      widget.posts.take(3).forEach((post) => debugPrint('Post ID: ${post['id']}'));
+      widget.posts
+          .take(3)
+          .forEach((post) => debugPrint('Post ID: ${post['id']}'));
+    }
+  }
+
+  /// 現在のユーザーIDを読み込む
+  Future<void> _loadCurrentUserId() async {
+    final userId = await _authService.getCurrentUserId();
+    if (mounted) {
+      setState(() {
+        _currentUserId = userId;
+      });
     }
   }
 
@@ -198,6 +217,73 @@ class _PostDetailScreenState extends State<PostDetailScreen>
     });
   }
 
+  /// 投稿を編集する
+  Future<void> _handleEditPost(Map<String, dynamic> post) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PostEditScreen(post: post),
+      ),
+    );
+
+    // 編集が成功した場合、いいね状態を再取得
+    if (result == true && mounted) {
+      _fetchLikeStatus(post['id']);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('投稿が更新されました')),
+      );
+    }
+  }
+
+  /// 投稿を削除する
+  Future<void> _handleDeletePost(Map<String, dynamic> post) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('投稿を削除'),
+        content: const Text('この投稿を削除してもよろしいですか？\nこの操作は取り消せません。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('キャンセル'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('削除'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      final response = await _authService.authenticatedRequest(
+        '/api/post/${post['id']}/delete/',
+        method: 'DELETE',
+      );
+
+      if (!mounted) return;
+
+      if (response.statusCode == 204) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('投稿を削除しました')),
+        );
+        // 画面を閉じて前の画面に戻る
+        Navigator.of(context).pop(true);
+      } else {
+        ErrorHandler.showError(context, '投稿の削除に失敗しました');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      if (kDebugMode) {
+        debugPrint('Error deleting post: $e');
+      }
+      ErrorHandler.showError(context, 'エラーが発生しました');
+    }
+  }
+
   @override
   void dispose() {
     _scrollController.dispose();
@@ -207,6 +293,16 @@ class _PostDetailScreenState extends State<PostDetailScreen>
 
   @override
   Widget build(BuildContext context) {
+    // 選択された投稿を取得
+    final selectedPost = widget.selectedIndex < _normalizedPosts.length
+        ? _normalizedPosts[widget.selectedIndex]
+        : null;
+
+    // 現在のユーザーが投稿の所有者かどうかを確認
+    final isOwner = selectedPost != null &&
+        _currentUserId != null &&
+        selectedPost['user']['id'].toString() == _currentUserId;
+
     return BaseLayout(
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -225,6 +321,20 @@ class _PostDetailScreenState extends State<PostDetailScreen>
               fontWeight: FontWeight.bold,
             ),
           ),
+          actions: isOwner
+              ? [
+                  IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.black),
+                    onPressed: () => _handleEditPost(selectedPost),
+                    tooltip: '編集',
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.black),
+                    onPressed: () => _handleDeletePost(selectedPost),
+                    tooltip: '削除',
+                  ),
+                ]
+              : null,
         ),
         body: _isCalculatingHeights
             ? const Center(child: CircularProgressIndicator())

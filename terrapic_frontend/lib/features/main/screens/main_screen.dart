@@ -16,7 +16,7 @@ import '../../../shared/providers/navigation_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 // 各画面のインポート
 import '../../home/screens/home_screen.dart';
-import '../../search/screens/search_screen.dart';
+import '../../search/screens/enhanced_search_screen.dart';
 import '../../posts/screens/post_screen.dart';
 import '../../ranking/screens/ranking_screen.dart';
 import '../../profile/screens/profile_screen.dart';
@@ -34,7 +34,7 @@ class _MainScreenState extends State<MainScreen> {
   // アプリの主要な画面をリストで管理
   final List<Widget> _screens = [
     const HomeScreen(), // ホーム画面
-    const SearchScreen(), // 検索画面
+    const EnhancedSearchScreen(), // 改善された検索画面
     const PostScreen(), // 投稿画面
     const RankingScreen(), // ランキング画面
     const ProfileScreen(), // プロフィール画面

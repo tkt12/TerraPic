@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/navigation_provider.dart';
 import '../../features/home/screens/home_screen.dart';
-import '../../features/search/screens/search_screen.dart';
+import '../../features/search/screens/enhanced_search_screen.dart';
 import '../../features/posts/screens/post_screen.dart';
 import '../../features/ranking/screens/ranking_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
@@ -27,7 +27,7 @@ class NavigationService {
   /// メイン画面のリスト
   static final List<Widget> mainScreens = [
     const HomeScreen(),
-    const SearchScreen(),
+    const EnhancedSearchScreen(),
     const PostScreen(),
     const RankingScreen(),
     const ProfileScreen(),
@@ -52,7 +52,7 @@ class NavigationService {
         screen = const HomeScreen();
         break;
       case 1:
-        screen = const SearchScreen();
+        screen = const EnhancedSearchScreen();
         break;
       case 3:
         screen = const RankingScreen();
