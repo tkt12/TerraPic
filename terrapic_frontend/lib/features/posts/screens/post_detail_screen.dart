@@ -187,7 +187,7 @@ class _PostDetailScreenState extends State<PostDetailScreen>
       if (!mounted) return;
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = json.decode(utf8.decode(response.bodyBytes));
         setState(() {
           _likeStates[postId] = data['is_liked'];
           _likeCounts[postId] = data['like_count'];
@@ -476,7 +476,7 @@ class _PostDetailScreenState extends State<PostDetailScreen>
       if (!mounted) return;
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = json.decode(utf8.decode(response.bodyBytes));
         setState(() {
           _likeStates[postId] = data['status'] == 'liked';
           _likeCounts[postId] = data['like_count'];
@@ -618,7 +618,7 @@ class _PostDetailScreenState extends State<PostDetailScreen>
       if (!mounted) return;
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = json.decode(utf8.decode(response.bodyBytes));
         final updatedPost = data['post'];
 
         // リスト内の該当投稿を更新
