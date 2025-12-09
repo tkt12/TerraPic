@@ -150,7 +150,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
   }
 
   /// 投稿写真をタップした時の処理
-  void _navigateToPostDetail(Map<String, dynamic> post) {
+  Future<void> _navigateToPostDetail(Map<String, dynamic> post) async {
     if (_placeDetails == null || _placeDetails!['photos'] == null) return;
 
     try {
