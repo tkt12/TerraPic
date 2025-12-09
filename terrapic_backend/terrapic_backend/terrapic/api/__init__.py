@@ -3,7 +3,7 @@ from .place import (
     NearbyPlacesView, PlaceSearchView, FavoriteView, 
     FavoriteStatusView, get_top_photo, place_details,
 )
-from .post import CreatePostView, LikeView, LikeStatusView
+from .post import CreatePostView, LikeView, LikeStatusView, delete_post, update_post
 from .profile import (
     profile, profile_edit, user_profile, 
     follow_toggle, get_followers, get_following,
@@ -12,7 +12,7 @@ from .profile import (
 from .ranking import (
     places_ranking, posts_ranking
 )
-from .search import search
+from .search import search, search_suggestions
 
 __all__ = [
     # 認証関連
@@ -32,6 +32,8 @@ __all__ = [
     'CreatePostView',
     'LikeView',
     'LikeStatusView',
+    'delete_post',
+    'update_post',
     
     # Profile関連
     'profile',
@@ -49,4 +51,5 @@ __all__ = [
     
     # Search関連
     'search',
+    'search_suggestions',
 ]

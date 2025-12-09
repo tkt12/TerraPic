@@ -172,7 +172,7 @@ def delete_post(request, post_id):
     """投稿を削除するAPI"""
     try:
         post = get_object_or_404(Posts, id=post_id)
-        
+
         # 投稿者本人のみ削除可能
         if post.user != request.user:
             return Response(
@@ -182,7 +182,7 @@ def delete_post(request, post_id):
 
         # PostServiceを使用して投稿を削除
         PostService.delete_post(post_id)
-        
+
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     except Posts.DoesNotExist:
@@ -194,5 +194,46 @@ def delete_post(request, post_id):
         logger.error(f"投稿削除中にエラー: {str(e)}")
         return Response(
             format_api_error('投稿の削除中にエラーが発生しました'),
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+@api_view(['PUT', 'PATCH'])
+@permission_classes([IsAuthenticated])
+def update_post(request, post_id):
+    """投稿を更新するAPI"""
+    try:
+        post = get_object_or_404(Posts, id=post_id)
+
+        # 投稿者本人のみ更新可能
+        if post.user != request.user:
+            return Response(
+                format_api_error('この投稿を更新する権限がありません'),
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # 更新可能なフィールド
+        if 'description' in request.data:
+            post.description = request.data['description']
+        if 'rating' in request.data:
+            post.rating = request.data['rating']
+        if 'weather' in request.data:
+            post.weather = request.data['weather']
+        if 'season' in request.data:
+            post.season = request.data['season']
+
+        post.save()
+
+        serializer = PostSerializer(post)
+        return Response(serializer.data)
+
+    except Posts.DoesNotExist:
+        return Response(
+            format_api_error('投稿が見つかりません'),
+            status=status.HTTP_404_NOT_FOUND
+        )
+    except Exception as e:
+        logger.error(f"投稿更新中にエラー: {str(e)}")
+        return Response(
+            format_api_error('投稿の更新中にエラーが発生しました'),
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
