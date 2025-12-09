@@ -388,7 +388,7 @@ class _ProfileScreenState extends State<ProfileScreen>
       if (!mounted) return;
 
       // 投稿詳細画面に遷移
-      await Navigator.push(
+      final result = await Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => PostDetailScreen(
@@ -403,11 +403,10 @@ class _ProfileScreenState extends State<ProfileScreen>
         ),
       );
 
-      // 画面遷移後の状態更新が必要な場合の処理
-      if (!mounted) return;
-      setState(() {
-        // 必要に応じて状態を更新
-      });
+      // 編集・削除が行われた場合はデータを再読み込み
+      if (result == true && mounted) {
+        await _loadProfileData();
+      }
     } catch (e) {
       if (!mounted) return;
 

@@ -38,8 +38,8 @@ class PostEditScreenState extends State<PostEditScreen> {
   // 投稿データ
   late TextEditingController _descriptionController;
   late double _rating;
-  String? _weather;
-  String? _season;
+  late String _weather;
+  late String _season;
   bool _isLoading = false;
 
   // 選択肢
@@ -54,8 +54,21 @@ class PostEditScreenState extends State<PostEditScreen> {
       text: widget.post['description'] ?? '',
     );
     _rating = (widget.post['rating'] ?? 3.0).toDouble();
-    _weather = widget.post['weather'];
-    _season = widget.post['season'];
+
+    // 天気と季節の初期化（既存の値があればそれを、なければデフォルト値）
+    final existingWeather = widget.post['weather'];
+    _weather = (existingWeather != null &&
+                existingWeather.isNotEmpty &&
+                _weatherOptions.contains(existingWeather))
+        ? existingWeather
+        : _weatherOptions[0];
+
+    final existingSeason = widget.post['season'];
+    _season = (existingSeason != null &&
+               existingSeason.isNotEmpty &&
+               _seasonOptions.contains(existingSeason))
+        ? existingSeason
+        : _seasonOptions[0];
   }
 
   @override
@@ -207,11 +220,19 @@ class PostEditScreenState extends State<PostEditScreen> {
                       ),
                     ),
                     child: DropdownButtonFormField<String>(
-                      decoration: dropdownDecoration.copyWith(labelText: '天候'),
+                      decoration: dropdownDecoration.copyWith(
+                        labelText: '天候 *',
+                      ),
                       value: _weather,
                       dropdownColor: Colors.white,
                       style: const TextStyle(color: Colors.black),
                       icon: const Icon(Icons.arrow_drop_down, color: Colors.blue),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '天候を選択してください';
+                        }
+                        return null;
+                      },
                       items: _weatherOptions.map((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
@@ -219,7 +240,9 @@ class PostEditScreenState extends State<PostEditScreen> {
                         );
                       }).toList(),
                       onChanged: (value) {
-                        setState(() => _weather = value);
+                        if (value != null) {
+                          setState(() => _weather = value);
+                        }
                       },
                     ),
                   ),
@@ -235,11 +258,19 @@ class PostEditScreenState extends State<PostEditScreen> {
                       ),
                     ),
                     child: DropdownButtonFormField<String>(
-                      decoration: dropdownDecoration.copyWith(labelText: '季節'),
+                      decoration: dropdownDecoration.copyWith(
+                        labelText: '季節 *',
+                      ),
                       value: _season,
                       dropdownColor: Colors.white,
                       style: const TextStyle(color: Colors.black),
                       icon: const Icon(Icons.arrow_drop_down, color: Colors.blue),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '季節を選択してください';
+                        }
+                        return null;
+                      },
                       items: _seasonOptions.map((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
@@ -247,7 +278,9 @@ class PostEditScreenState extends State<PostEditScreen> {
                         );
                       }).toList(),
                       onChanged: (value) {
-                        setState(() => _season = value);
+                        if (value != null) {
+                          setState(() => _season = value);
+                        }
                       },
                     ),
                   ),

@@ -150,7 +150,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
   }
 
   /// 投稿写真をタップした時の処理
-  void _navigateToPostDetail(Map<String, dynamic> post) {
+  Future<void> _navigateToPostDetail(Map<String, dynamic> post) async {
     if (_placeDetails == null || _placeDetails!['photos'] == null) return;
 
     try {
@@ -182,7 +182,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
         throw Exception('Post not found in normalized list');
       }
 
-      Navigator.push(
+      final result = await Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => PostDetailScreen(
@@ -198,6 +198,11 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
           ),
         ),
       );
+
+      // 編集・削除が行われた場合はデータを再読み込み
+      if (result == true && mounted) {
+        await _fetchPlaceDetails();
+      }
     } catch (e) {
       ErrorHandler.showError(context, 'エラーが発生しました: $e');
       if (kDebugMode) {

@@ -672,7 +672,7 @@ class _EnhancedSearchScreenState extends State<EnhancedSearchScreen> {
   }
 
   /// 投稿詳細画面に遷移
-  void _navigateToPostDetail(Map<String, dynamic> post, List<dynamic> posts) {
+  Future<void> _navigateToPostDetail(Map<String, dynamic> post, List<dynamic> posts) async {
     try {
       // 投稿リストを正規化
       final normalizedPosts = PostNormalizer.normalizeList(
@@ -699,7 +699,7 @@ class _EnhancedSearchScreenState extends State<EnhancedSearchScreen> {
         index: selectedIndex,
       );
 
-      Navigator.push(
+      final result = await Navigator.push(
         context,
         NoAnimationMaterialPageRoute(
           builder: (context) => PostDetailScreen(
@@ -714,6 +714,11 @@ class _EnhancedSearchScreenState extends State<EnhancedSearchScreen> {
           ),
         ),
       );
+
+      // 編集・削除が行われた場合は検索を再実行
+      if (result == true && mounted) {
+        await _performSearch(_searchController.text);
+      }
     } catch (e) {
       _showError('投稿の表示中にエラーが発生しました: $e');
       if (kDebugMode) {

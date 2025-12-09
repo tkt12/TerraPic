@@ -114,8 +114,8 @@ class _PostDetailScreenState extends State<PostDetailScreen>
       _showDoubleTapLike[post['id']] = false;
     }
 
-    // 現在のユーザーIDを取得
-    _loadCurrentUserId();
+    // 現在のユーザーIDを取得（同期的に実行）
+    _initializeUserId();
 
     if (kDebugMode) {
       debugPrint('PostDetailScreen initialized with:');
@@ -128,13 +128,24 @@ class _PostDetailScreenState extends State<PostDetailScreen>
     }
   }
 
+  /// 現在のユーザーIDを初期化
+  Future<void> _initializeUserId() async {
+    await _loadCurrentUserId();
+  }
+
   /// 現在のユーザーIDを読み込む
   Future<void> _loadCurrentUserId() async {
     final userId = await _authService.getCurrentUserId();
+    if (kDebugMode) {
+      debugPrint('_loadCurrentUserId - User ID loaded: $userId');
+    }
     if (mounted) {
       setState(() {
         _currentUserId = userId;
       });
+      if (kDebugMode) {
+        debugPrint('_loadCurrentUserId - State updated with User ID: $_currentUserId');
+      }
     }
   }
 
@@ -143,12 +154,26 @@ class _PostDetailScreenState extends State<PostDetailScreen>
     super.didChangeDependencies();
     if (!_hasCalculatedHeights) {
       _hasCalculatedHeights = true;
-      setState(() {
-        _isCalculatingHeights = false;
-      });
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scrollToSelectedItem();
-      });
+      // ユーザーIDを確実に取得してから画面を表示
+      if (_currentUserId == null) {
+        _loadCurrentUserId().then((_) {
+          if (mounted) {
+            setState(() {
+              _isCalculatingHeights = false;
+            });
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _scrollToSelectedItem();
+            });
+          }
+        });
+      } else {
+        setState(() {
+          _isCalculatingHeights = false;
+        });
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _scrollToSelectedItem();
+        });
+      }
     }
   }
 
@@ -162,7 +187,7 @@ class _PostDetailScreenState extends State<PostDetailScreen>
       if (!mounted) return;
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = json.decode(utf8.decode(response.bodyBytes));
         setState(() {
           _likeStates[postId] = data['is_liked'];
           _likeCounts[postId] = data['like_count'];
@@ -217,73 +242,6 @@ class _PostDetailScreenState extends State<PostDetailScreen>
     });
   }
 
-  /// 投稿を編集する
-  Future<void> _handleEditPost(Map<String, dynamic> post) async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PostEditScreen(post: post),
-      ),
-    );
-
-    // 編集が成功した場合、いいね状態を再取得
-    if (result == true && mounted) {
-      _fetchLikeStatus(post['id']);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('投稿が更新されました')),
-      );
-    }
-  }
-
-  /// 投稿を削除する
-  Future<void> _handleDeletePost(Map<String, dynamic> post) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('投稿を削除'),
-        content: const Text('この投稿を削除してもよろしいですか？\nこの操作は取り消せません。'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('キャンセル'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('削除'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed != true) return;
-
-    try {
-      final response = await _authService.authenticatedRequest(
-        '/api/post/${post['id']}/delete/',
-        method: 'DELETE',
-      );
-
-      if (!mounted) return;
-
-      if (response.statusCode == 204) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('投稿を削除しました')),
-        );
-        // 画面を閉じて前の画面に戻る
-        Navigator.of(context).pop(true);
-      } else {
-        ErrorHandler.showError(context, '投稿の削除に失敗しました');
-      }
-    } catch (e) {
-      if (!mounted) return;
-      if (kDebugMode) {
-        debugPrint('Error deleting post: $e');
-      }
-      ErrorHandler.showError(context, 'エラーが発生しました');
-    }
-  }
-
   @override
   void dispose() {
     _scrollController.dispose();
@@ -293,16 +251,6 @@ class _PostDetailScreenState extends State<PostDetailScreen>
 
   @override
   Widget build(BuildContext context) {
-    // 選択された投稿を取得
-    final selectedPost = widget.selectedIndex < _normalizedPosts.length
-        ? _normalizedPosts[widget.selectedIndex]
-        : null;
-
-    // 現在のユーザーが投稿の所有者かどうかを確認
-    final isOwner = selectedPost != null &&
-        _currentUserId != null &&
-        selectedPost['user']['id'].toString() == _currentUserId;
-
     return BaseLayout(
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -321,20 +269,6 @@ class _PostDetailScreenState extends State<PostDetailScreen>
               fontWeight: FontWeight.bold,
             ),
           ),
-          actions: isOwner
-              ? [
-                  IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.black),
-                    onPressed: () => _handleEditPost(selectedPost),
-                    tooltip: '編集',
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.black),
-                    onPressed: () => _handleDeletePost(selectedPost),
-                    tooltip: '削除',
-                  ),
-                ]
-              : null,
         ),
         body: _isCalculatingHeights
             ? const Center(child: CircularProgressIndicator())
@@ -379,6 +313,18 @@ class _PostDetailScreenState extends State<PostDetailScreen>
 
   Widget _buildUserHeader(Map<String, dynamic> post) {
     final user = post['user'];
+    // 現在のユーザーが投稿の所有者かどうかを確認
+    final isOwner = _currentUserId != null &&
+        user['id'] != null &&
+        user['id'].toString() == _currentUserId;
+
+    if (kDebugMode) {
+      debugPrint('_buildUserHeader - Post ID: ${post['id']}');
+      debugPrint('  Current User ID: $_currentUserId');
+      debugPrint('  Post User ID: ${user['id']}');
+      debugPrint('  Is Owner: $isOwner');
+    }
+
     return ListTile(
       leading: GestureDetector(
         onTap: () => _navigateToUserProfile(user),
@@ -415,6 +361,12 @@ class _PostDetailScreenState extends State<PostDetailScreen>
           post['place']['name'],
         ),
       ),
+      trailing: isOwner
+          ? IconButton(
+              icon: const Icon(Icons.more_horiz),
+              onPressed: () => _showPostMenu(context, post),
+            )
+          : null,
     );
   }
 
@@ -524,7 +476,7 @@ class _PostDetailScreenState extends State<PostDetailScreen>
       if (!mounted) return;
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = json.decode(utf8.decode(response.bodyBytes));
         setState(() {
           _likeStates[postId] = data['status'] == 'liked';
           _likeCounts[postId] = data['like_count'];
@@ -606,5 +558,148 @@ class _PostDetailScreenState extends State<PostDetailScreen>
               ),
       ),
     );
+  }
+
+  /// 投稿メニューを表示
+  void _showPostMenu(BuildContext context, Map<String, dynamic> post) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit),
+              title: const Text('編集'),
+              onTap: () {
+                Navigator.pop(context);
+                _handleEditPost(post);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete, color: Colors.red),
+              title: const Text('削除', style: TextStyle(color: Colors.red)),
+              onTap: () {
+                Navigator.pop(context);
+                _handleDeletePost(post);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 投稿を編集する
+  Future<void> _handleEditPost(Map<String, dynamic> post) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PostEditScreen(post: post),
+      ),
+    );
+
+    // 編集が成功した場合、投稿データを再取得して画面を更新
+    if (result == true && mounted) {
+      await _refreshPostData(post['id']);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('投稿が更新されました')),
+      );
+    }
+  }
+
+  /// 投稿データを再取得して更新
+  Future<void> _refreshPostData(int postId) async {
+    try {
+      final response = await _authService.authenticatedRequest(
+        '/api/post/$postId/like/status/',
+      );
+
+      if (!mounted) return;
+
+      if (response.statusCode == 200) {
+        final data = json.decode(utf8.decode(response.bodyBytes));
+        final updatedPost = data['post'];
+
+        // リスト内の該当投稿を更新
+        final index = _normalizedPosts.indexWhere((p) => p['id'] == postId);
+        if (index != -1) {
+          setState(() {
+            _normalizedPosts[index] = {
+              ..._normalizedPosts[index],
+              'description': updatedPost['description'],
+              'rating': updatedPost['rating'],
+              'weather': updatedPost['weather'],
+              'season': updatedPost['season'],
+            };
+            _likeStates[postId] = data['is_liked'];
+            _likeCounts[postId] = data['like_count'];
+          });
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Error refreshing post data: $e');
+      }
+    }
+  }
+
+  /// 投稿を削除する
+  Future<void> _handleDeletePost(Map<String, dynamic> post) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('投稿を削除'),
+        content: const Text('この投稿を削除してもよろしいですか？\nこの操作は取り消せません。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('キャンセル'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('削除'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      final response = await _authService.authenticatedRequest(
+        '/api/post/${post['id']}/delete/',
+        method: 'DELETE',
+      );
+
+      if (!mounted) return;
+
+      if (response.statusCode == 204) {
+        // リストから削除された投稿を除外
+        setState(() {
+          _normalizedPosts.removeWhere((p) => p['id'] == post['id']);
+        });
+
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('投稿を削除しました')),
+        );
+
+        // 投稿が全て削除された場合は画面を閉じる
+        if (_normalizedPosts.isEmpty) {
+          Navigator.of(context).pop(true);
+        }
+      } else {
+        ErrorHandler.showError(context, '投稿の削除に失敗しました');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      if (kDebugMode) {
+        debugPrint('Error deleting post: $e');
+      }
+      ErrorHandler.showError(context, 'エラーが発生しました');
+    }
   }
 }

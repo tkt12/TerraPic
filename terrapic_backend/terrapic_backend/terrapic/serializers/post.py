@@ -51,6 +51,7 @@ class PostSerializer(serializers.ModelSerializer):
     def get_user(self, obj):
         """投稿ユーザーの情報を取得"""
         return {
+            'id': obj.user.id,
             'username': obj.user.username,
             'profile_image': obj.user.profile_image.url if obj.user.profile_image else None
         }

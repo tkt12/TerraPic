@@ -217,9 +217,9 @@ def update_post(request, post_id):
         if 'rating' in request.data:
             post.rating = request.data['rating']
         if 'weather' in request.data:
-            post.weather = request.data['weather']
+            post.weather = request.data['weather'] or ''
         if 'season' in request.data:
-            post.season = request.data['season']
+            post.season = request.data['season'] or ''
 
         post.save()
 
