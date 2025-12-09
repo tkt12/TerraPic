@@ -232,14 +232,14 @@ class PostService:
     def get_ranking(period='all', limit=10):
         """
         投稿のランキングを取得する
-        
+
         Args:
             period: ランキング期間（weekly/monthly/all）
             limit: 取得件数
         """
         try:
             period_filter = get_period_filter(period, 'Posts')
-            
+
             posts = Posts.objects.filter(
                 period_filter
             ).select_related(
@@ -255,5 +255,25 @@ class PostService:
 
         except Exception as e:
             logger.error(f"投稿ランキング取得中にエラー: {str(e)}")
+            raise
+
+    @staticmethod
+    @transaction.atomic
+    def delete_post(post_id):
+        """
+        投稿を削除する
+
+        Args:
+            post_id: 削除する投稿のID
+        """
+        try:
+            post = Posts.objects.get(id=post_id)
+            post.delete()
+            logger.info(f"投稿を削除しました: ID {post_id}")
+        except Posts.DoesNotExist:
+            logger.warning(f"投稿が見つかりません: ID {post_id}")
+            raise
+        except Exception as e:
+            logger.error(f"投稿削除中にエラー: {str(e)}")
             raise
 
